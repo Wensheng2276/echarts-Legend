@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>echarts Legend</title>
+  <script src="echarts.js"></script>
+  <style>
+  #section {
+    width: 800px;
+    height: 450px;
+    margin: 80px auto;
+  }
+  </style>
+</head>
+
+<body>
+  <div id="section"></div>
+</body>
+<script>
+var myCharts = echarts.init(document.getElementById("section"));
+
+var triggerAction = function(action, selected) {
+  legend = [];
+
+  for (name in selected) {
+    if (selected.hasOwnProperty(name)) {
+      legend.push({
+        name: name
+      });
+    }
+  }
+
+  myCharts.dispatchAction({
+    type: action,
+    batch: legend
+  });
+};
+
+//是否只选择一个图例
+var isFirstUnSelect = function(selected) {
+  var unSelectedCount = 0;
+  for (name in selected) {
+    if (!selected.hasOwnProperty(name)) {
+      continue;
+    }
+
+    if (selected[name] == false) {
+      ++unSelectedCount;
+    }
+  }
+
+  return unSelectedCount == 1;
+};
+
+//定义一个开关，第一次点击的时候才翻转。当所有都被选择的时候，再次点击不会只显示一个。
+var first = true;
+
+myCharts.on('legendselectchanged', function(obj) {
+  var selected = obj.selected;
+  var legend = obj.name;
+
+  // 使用 legendToggleSelect Action 会重新触发 legendselectchanged Event，导致本函数重复运行
+  // 使得 无 selected 对象
+  if (selected != undefined && isFirstUnSelect(selected) && first) {
+    triggerAction('legendToggleSelect', selected);
+    first = false;
+  }
+});
+
+option = {
+  tooltip: {
+    trigger: 'axis'
+  },
+  legend: {
+    data: ['邮件营销', '联盟广告', '视频广告', '直接访问', '搜索引擎']
+  },
+  toolbox: {
+    show: true,
+    feature: {
+      mark: {
+        show: true
+      },
+      dataView: {
+        show: true,
+        readOnly: false
+      },
+      magicType: {
+        show: true,
+        type: ['line', 'bar', 'stack', 'tiled']
+      },
+      restore: {
+        show: true
+      },
+      saveAsImage: {
+        show: true
+      }
+    }
+  },
+  calculable: true,
+  xAxis: [{
+    type: 'category',
+    boundaryGap: false,
+    data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+  }],
+  yAxis: [{
+    type: 'value'
+  }],
+  series: [{
+    name: '邮件营销',
+    type: 'line',
+    stack: '总量',
+    data: [120, 132, 101, 134, 90, 230, 210]
+  }, {
+    name: '联盟广告',
+    type: 'line',
+    stack: '总量',
+    data: [220, 182, 191, 234, 290, 330, 310]
+  }, {
+    name: '视频广告',
+    type: 'line',
+    stack: '总量',
+    data: [150, 232, 201, 154, 190, 330, 410]
+  }, {
+    name: '直接访问',
+    type: 'line',
+    stack: '总量',
+    data: [320, 332, 301, 334, 390, 330, 320]
+  }, {
+    name: '搜索引擎',
+    type: 'line',
+    stack: '总量',
+    data: [820, 932, 901, 934, 1290, 1330, 1320]
+  }]
+};
+
+myCharts.setOption(option);
+</script>
+
+</html>
